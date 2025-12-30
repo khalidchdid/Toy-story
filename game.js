@@ -104,12 +104,12 @@
     setStreak(0);
     resetBall(false);
 
-    // Ensure paddle starts centered
+    // Ensure paddles start centered
     state.player.y = Math.floor(state.H * 0.5 - state.player.h * 0.5);
     state.ai.y = Math.floor(state.H * 0.5 - state.ai.h * 0.5);
   }
 
-  // ---------- Touch controls ----------
+  // ---------- Touch controls (no jump on first touch) ----------
   function canvasToLocalY(clientY) {
     const rect = canvas.getBoundingClientRect();
     const y01 = (clientY - rect.top) / rect.height;
@@ -117,17 +117,30 @@
   }
 
   let dragging = false;
+  let dragStartY = 0;   // finger start (canvas coords)
+  let paddleStartY = 0; // paddle y at touch start
 
   canvas.addEventListener("pointerdown", (e) => {
     if (mode !== "playing") return;
     dragging = true;
     canvas.setPointerCapture(e.pointerId);
-    state.player.targetY = canvasToLocalY(e.clientY);
+
+    // Store start positions ONLY — do NOT move paddle here
+    dragStartY = canvasToLocalY(e.clientY);
+    paddleStartY = state.player.y;
+
+    // Disable target follow mode while dragging
+    state.player.targetY = null;
   });
 
   canvas.addEventListener("pointermove", (e) => {
     if (!dragging || mode !== "playing") return;
-    state.player.targetY = canvasToLocalY(e.clientY);
+
+    const y = canvasToLocalY(e.clientY);
+    const dy = y - dragStartY;
+
+    // Move paddle by finger displacement (no initial jump)
+    state.player.y = clamp(paddleStartY + dy, 0, state.H - state.player.h);
   });
 
   canvas.addEventListener("pointerup", () => {
@@ -184,7 +197,7 @@
   function update(dt) {
     const { W, H, player, ai, ball } = state;
 
-    // Player follows touch target
+    // Player target-follow mode (only used if targetY is set; we keep it null during drag)
     if (player.targetY != null) {
       const target = player.targetY - player.h / 2;
       const dy = target - player.y;
@@ -245,22 +258,21 @@
     ctx.fillStyle = "#0b0f14";
     ctx.fillRect(0, 0, W, H);
 
-    
-    // TOP + BOTTOM borders (clear)
+    // TOP + BOTTOM borders (clear; bottom moved slightly up so it's visible on iPhone)
     ctx.save();
     ctx.globalAlpha = 0.65;
     ctx.fillStyle = "#e7edf6";
     const borderH = Math.max(3, Math.floor(H * 0.006));
 
-// Top border (exactly at top)
+    // Top border
     ctx.fillRect(0, 0, W, borderH);
 
-// Bottom border: draw slightly ABOVE the bottom so it's not hidden by the iPhone home indicator
-    const visInset = Math.floor(14 * (window.devicePixelRatio || 1)); // ~14px in device pixels
+    // Bottom border (shifted up from the very bottom to avoid home-indicator area)
+    const visInset = Math.floor(14 * (window.devicePixelRatio || 1)); // device pixels
     ctx.fillRect(0, H - visInset - borderH, W, borderH);
 
     ctx.restore();
-    
+
     // Center dashed line
     ctx.save();
     ctx.globalAlpha = 0.25;
