@@ -205,7 +205,7 @@
       accel: 22,                        // ramps speed over time
 
       gravity: Math.max(2600, H * 4.4),   // stronger gravity = less float
-      jumpV: Math.max(520, H * 0.88),     // smaller jump impulse = lower jump
+      jumpV: Math.max(560, H * 0.95),     // smaller jump impulse = lower jump
       holdBoost: 0.22,                    // holding helps a bit, not too much
       maxHold: 0.08,                      // shorter hold window
 
