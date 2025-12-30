@@ -204,10 +204,10 @@
       speed: Math.max(420, W * 0.55),  // starts fast-ish like dino
       accel: 22,                        // ramps speed over time
 
-      gravity: Math.max(2000, H * 3.4),
-      jumpV: Math.max(780, H * 1.35),
-      holdBoost: 0.55,
-      maxHold: 0.15,
+      gravity: Math.max(2600, H * 4.4),   // stronger gravity = less float
+      jumpV: Math.max(520, H * 0.88),     // smaller jump impulse = lower jump
+      holdBoost: 0.22,                    // holding helps a bit, not too much
+      maxHold: 0.08,                      // shorter hold window
 
       runner: {
         x: Math.floor(W * 0.14),
