@@ -1,75 +1,108 @@
-:root {
-  --bg: #0b0f14;
-  --fg: #e7edf6;
-  --muted: #9aa7b5;
-  --pill: rgba(255,255,255,0.08);
-  --pillBorder: rgba(255,255,255,0.14);
+:root{
+  --bg:#0b0f14;
+  --fg:#e7edf6;
+  --muted:#9aa7b5;
 }
 
-* { box-sizing: border-box; }
-html, body {
-  height: 100%;
-  margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  overflow: hidden; /* prevent scrolling on iPhone */
-  touch-action: none; /* allow smooth drag controls */
+*{box-sizing:border-box}
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  overflow:hidden;
+  touch-action:none;
 }
 
-#game {
-  display: block;
-  margin: 0 auto;
-  width: 100vw;
-  height: 100vh;
+/* Fullscreen canvas */
+#game{
+  display:block;
+  width:100vw;
+  height:100vh;
 }
 
-#hud {
-  position: fixed;
-  top: env(safe-area-inset-top);
-  left: env(safe-area-inset-left);
-  right: env(safe-area-inset-right);
-  padding: 12px 14px;
-  z-index: 2;
-  pointer-events: none; /* canvas still receives touch */
-}
-
-#hud .row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: space-between;
-}
-
-#hud .row.small {
-  margin-top: 10px;
-  gap: 12px;
-}
-
-.pill {
-  background: var(--pill);
-  border: 1px solid var(--pillBorder);
-  border-radius: 999px;
-  padding: 8px 12px;
+/* Only streak shown during play */
+#streakHud{
+  position:fixed;
+  top: calc(env(safe-area-inset-top) + 10px);
+  left: calc(env(safe-area-inset-left) + 12px);
+  z-index:3;
+  padding:8px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.10);
+  border:1px solid rgba(255,255,255,0.14);
   backdrop-filter: blur(10px);
-  pointer-events: none;
+  font-weight:800;
+  font-size:22px;
+  pointer-events:none;
 }
 
-.hint {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.2;
-  flex: 1;
-  pointer-events: none;
+/* Overlay for Start / Game Over */
+.overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:4;
+  background:rgba(11,15,20,0.65);
+  padding:24px;
 }
 
-button {
-  pointer-events: auto; /* clickable */
-  background: rgba(255,255,255,0.14);
-  border: 1px solid rgba(255,255,255,0.18);
-  color: var(--fg);
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-weight: 600;
+.overlay.hidden{ display:none; }
+
+.card{
+  width:min(420px, 92vw);
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.14);
+  border-radius:18px;
+  padding:18px;
+  backdrop-filter: blur(14px);
 }
-button:active { transform: translateY(1px); }
+
+.title{
+  font-size:28px;
+  font-weight:900;
+  text-align:center;
+  margin-bottom:14px;
+}
+
+.scores{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin: 10px 0 16px;
+}
+
+.scoreRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.10);
+}
+
+.label{ color:var(--muted); font-weight:700; }
+.value{ font-size:22px; font-weight:900; }
+
+button{
+  width:100%;
+  background:rgba(255,255,255,0.16);
+  border:1px solid rgba(255,255,255,0.18);
+  color:var(--fg);
+  border-radius:14px;
+  padding:14px 12px;
+  font-weight:900;
+  font-size:18px;
+}
+button:active{ transform:translateY(1px); }
+
+.tiny{
+  margin-top:10px;
+  text-align:center;
+  color:var(--muted);
+  font-size:12px;
+}
