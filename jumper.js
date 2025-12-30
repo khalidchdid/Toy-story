@@ -201,8 +201,8 @@
       groundY,
       groundThickness,
 
-      speed: Math.max(420, W * 0.55),  // starts fast-ish like dino
-      accel: 22,                        // ramps speed over time
+      speed: Math.max(220, W * 0.28), // much slower start
+      accel: 10,                      // gentle ramp,                        // ramps speed over time
 
       gravity: Math.max(2600, H * 4.4),   // stronger gravity = less float
       jumpV: Math.max(560, H * 0.95),     // smaller jump impulse = lower jump
@@ -256,33 +256,60 @@
 
   function spawnObstacle() {
     const W = world.W;
-    const kindRoll = Math.random();
 
-    let map = CACTUS_SMALL;
-    if (kindRoll > 0.7) map = CACTUS_BIG;
-    if (kindRoll > 0.88) map = CACTUS_DOUBLE;
+  // How many cacti in the group: 1..4
+    const countRoll = Math.random();
+    const count = countRoll < 0.60 ? 1 : countRoll < 0.82 ? 2 : countRoll < 0.94 ? 3 : 4;
 
-    const scale = world.px;
-    const ow = map[0].length * scale;
-    const oh = map.length * scale;
+  // Base spacing between cacti (in pixels)
+    const baseGap = Math.max(world.px * 2, Math.floor(world.W * 0.006));
 
-    world.obstacles.push({
-      x: W + ow + 20,
-      y: world.groundY - oh,
-      w: ow,
-      h: oh,
-      map,
-      scale,
-    });
+    const cacti = [];
+    let dx = 0;
+    let groupRight = 0;
 
-    // gaps shrink with speed (like real game)
-    const speed = world.speed;
-    const baseMin = 0.65, baseMax = 1.25;
-    const speedFactor = clamp(520 / speed, 0.55, 1.0);
-    world.nextSpawn = clamp((baseMin + Math.random() * (baseMax - baseMin)) * speedFactor, 0.45, 1.2);
-    world.spawnT = 0;
-  }
+    for (let k = 0; k < count; k++) {
+    // pick a shape
+      const r = Math.random();
+      let map = CACTUS_SMALL;
+      if (r > 0.72) map = CACTUS_BIG;
+      if (r > 0.90) map = CACTUS_DOUBLE; // rare (wider)
 
+    // random height: scale factor (affects both width & height slightly, but height more via map choice)
+    // keep it subtle like real game
+      const heightScale = 0.85 + Math.random() * 0.55; // 0.85..1.40
+      const scale = Math.max(1, Math.floor(world.px * heightScale));
+
+      const w = map[0].length * scale;
+      const h = map.length * scale;
+
+    // place cactus with its own size
+      cacti.push({
+        dx,
+        y: world.groundY - h,
+        w,
+        h,
+        map,
+        scale,
+      });
+
+      dx += w + baseGap;
+      groupRight = dx;
+    }
+
+  world.obstacles.push({
+    x: W + 30,
+    cacti,
+    right: groupRight, // total width for offscreen removal
+  });
+
+  // spawn gap depends on speed (slower start => larger gaps)
+  const speed = world.speed;
+  const baseMin = 0.85, baseMax = 1.55;
+  const speedFactor = clamp(520 / speed, 0.65, 1.25);
+  world.nextSpawn = clamp((baseMin + Math.random() * (baseMax - baseMin)) * speedFactor, 0.55, 1.8);
+  world.spawnT = 0;
+}
   function aabbHit(a, b) {
     return (
       a.x < b.x + b.w &&
