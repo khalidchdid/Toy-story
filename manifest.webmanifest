@@ -1,6 +1,6 @@
 {
-  "name": "Pong",
-  "short_name": "Pong",
+  "name": "Toy Story",
+  "short_name": "Toy Story",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0b0f14",
