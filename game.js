@@ -246,42 +246,41 @@
   }
 
   function draw() {
-    const { W, H, player, ai, ball } = state;
+  const { W, H, player, ai, ball } = state;
 
-    // Background
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillRect(0, 0, W, H);
+  // Background (IMPORTANT: set fillStyle before fillRect)
+  ctx.fillStyle = "#0b0f14";
+  ctx.fillRect(0, 0, W, H);
 
-    // Center dashed line
-    ctx.save();
-    ctx.globalAlpha = 0.25;
-    ctx.fillStyle = "#ffffff";
-    const dashH = Math.max(10, Math.floor(H * 0.03));
-    const gap = dashH;
-    for (let y = 0; y < H; y += dashH + gap) {
-      ctx.fillRect(W / 2 - 2, y, 4, dashH);
-    }
-    ctx.restore();
-
-    // Paddles + ball
-    ctx.fillStyle = "#e7edf6";
-    ctx.fillRect(player.x, player.y, player.w, player.h);
-    ctx.fillRect(ai.x, ai.y, ai.w, ai.h);
-
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Tiny instruction on canvas if streak is 0
-    if (streak === 0) {
-      ctx.save();
-      ctx.globalAlpha = 0.65;
-      ctx.font = `${Math.floor(H * 0.035)}px system-ui`;
-      ctx.textAlign = "center";
-      ctx.fillText("Return the ball — your streak is your score.", W / 2, H * 0.80);
-      ctx.restore();
-    }
+  // Center dashed line
+  ctx.save();
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = "#ffffff";
+  const dashH = Math.max(10, Math.floor(H * 0.03));
+  const gap = dashH;
+  for (let y = 0; y < H; y += dashH + gap) {
+    ctx.fillRect(W / 2 - 2, y, 4, dashH);
   }
+  ctx.restore();
+
+  // Paddles + ball
+  ctx.fillStyle = "#e7edf6";
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+  ctx.fillRect(ai.x, ai.y, ai.w, ai.h);
+
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (streak === 0) {
+    ctx.save();
+    ctx.globalAlpha = 0.65;
+    ctx.font = `${Math.floor(H * 0.035)}px system-ui`;
+    ctx.textAlign = "center";
+    ctx.fillText("Return the ball — your streak is your score.", W / 2, H * 0.80);
+    ctx.restore();
+  }
+}
 
   // Main loop
   let last = performance.now();
