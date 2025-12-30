@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b0f14" />
 
-  <!-- iOS "app-like" -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Pong" />
@@ -15,22 +14,34 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="hud">
-    <div class="row">
-      <div class="pill">Streak: <span id="streak">0</span></div>
-      <div class="pill">Best: <span id="best">0</span></div>
-    </div>
-    <div class="row small">
-      <div class="hint">Touch: drag to move • Desktop: ↑ ↓ or W S • Tap Restart anytime</div>
-      <button id="restart">Restart</button>
+  <!-- Only visible during play: Streak -->
+  <div id="streakHud"><span id="streak">0</span></div>
+
+  <!-- Start / Game Over overlay -->
+  <div id="overlay" class="overlay">
+    <div class="card">
+      <div class="title">Pong</div>
+
+      <div class="scores">
+        <div class="scoreRow">
+          <span class="label">Last</span>
+          <span class="value" id="lastScore">0</span>
+        </div>
+        <div class="scoreRow">
+          <span class="label">Best</span>
+          <span class="value" id="bestScore">0</span>
+        </div>
+      </div>
+
+      <button id="startBtn">Start</button>
+      <div class="tiny">Tip: drag your finger to move</div>
     </div>
   </div>
 
-  <canvas id="game" width="900" height="600" aria-label="Pong game canvas"></canvas>
+  <canvas id="game" aria-label="Pong game canvas"></canvas>
 
   <script src="game.js"></script>
   <script>
-    // Register service worker for offline support
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./service-worker.js");
     }
