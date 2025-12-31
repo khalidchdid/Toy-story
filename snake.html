@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f14" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Toy story" />
+
+  <title>Toy story • Snake</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Score top-right (only thing visible during play, like your style) -->
+  <div class="hud hudRight"><span id="score">00000</span></div>
+
+  <!-- Start / Game Over overlay -->
+  <div id="overlay" class="overlay">
+    <div class="card">
+      <div class="title">Snake</div>
+
+      <div class="scores">
+        <div class="scoreRow">
+          <span class="label">Last</span>
+          <span class="value" id="lastScore">0</span>
+        </div>
+        <div class="scoreRow">
+          <span class="label">Best</span>
+          <span class="value" id="bestScore">0</span>
+        </div>
+      </div>
+
+      <button id="startBtn">Start</button>
+      <a class="linkBack" href="./index.html">← Back to Toy story</a>
+      <div class="tiny">Swipe to turn • Wrap-around • Constant speed</div>
+    </div>
+  </div>
+
+  <canvas id="game" aria-label="Snake canvas"></canvas>
+
+  <script src="snake.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("./service-worker.js");
+  </script>
+</body>
+</html>
