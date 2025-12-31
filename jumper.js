@@ -8,9 +8,6 @@
   const bestScoreEl = document.getElementById("bestScore");
   const distEl = document.getElementById("dist");
 
-  // Optional rotate overlay (we'll create it from JS if not present)
-  let rotateOverlay = document.getElementById("rotateOverlay");
-
   const BG = "#0b0f14";
   const FG = "#e7edf6";
   const MUTED = "#9aa7b5";
@@ -24,6 +21,7 @@
 
   const input = { pressed: false };
 
+  // ---------- UI helpers ----------
   function setBest(v) {
     best = v;
     localStorage.setItem("jumperBest", String(best));
@@ -31,14 +29,12 @@
   }
 
   function formatScore(n) {
-    const s = String(Math.max(0, Math.floor(n)));
-    return s.padStart(5, "0");
+    return String(Math.max(0, Math.floor(n))).padStart(5, "0");
   }
 
   function setScore(v) {
     score = v;
-    const s = formatScore(score);
-    distEl.textContent = s;
+    distEl.textContent = formatScore(score);
     if (Math.floor(score) > best) setBest(Math.floor(score));
   }
 
@@ -48,11 +44,38 @@
     bestScoreEl.textContent = String(best);
   }
 
+  // ---------- Canvas sizing ----------
+  function resizeCanvasToDisplaySize() {
+    const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+    const rect = canvas.getBoundingClientRect();
+    const w = Math.floor(rect.width * dpr);
+    const h = Math.floor(rect.height * dpr);
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+  }
+
+  function clamp(v, a, b) {
+    return Math.max(a, Math.min(b, v));
+  }
+
+  // ---------- Landscape helper ----------
+  function isPortrait() {
+    const rect = canvas.getBoundingClientRect();
+    return rect.height > rect.width;
+  }
+
+  // ---------- Rotate overlay (safe, never blocks Start) ----------
+  let rotateOverlay = document.getElementById("rotateOverlay");
+
   function ensureRotateOverlay() {
-    rotateOverlay.style.pointerEvents = "none";
-    if (rotateOverlay) return;
-    rotateOverlay = document.createElement("div");
-    rotateOverlay.id = "rotateOverlay";
+    if (!rotateOverlay) {
+      rotateOverlay = document.createElement("div");
+      rotateOverlay.id = "rotateOverlay";
+      document.body.appendChild(rotateOverlay);
+    }
+
     rotateOverlay.style.position = "fixed";
     rotateOverlay.style.inset = "0";
     rotateOverlay.style.zIndex = "10";
@@ -61,7 +84,12 @@
     rotateOverlay.style.justifyContent = "center";
     rotateOverlay.style.background = "rgba(11,15,20,0.75)";
     rotateOverlay.style.color = FG;
-    rotateOverlay.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+    rotateOverlay.style.fontFamily =
+      "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+
+    // IMPORTANT: never steal taps from the Start overlay
+    rotateOverlay.style.pointerEvents = "none";
+
     rotateOverlay.innerHTML = `
       <div style="
         width:min(420px,92vw);
@@ -76,25 +104,10 @@
           Jumper is best in landscape mode.
         </div>
       </div>`;
-    document.body.appendChild(rotateOverlay);
   }
 
-  function resizeCanvasToDisplaySize() {
-    const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
-    const rect = canvas.getBoundingClientRect();
-    const w = Math.floor(rect.width * dpr);
-    const h = Math.floor(rect.height * dpr);
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
-  }
-
-  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
-
-  // --- Pixel helpers (for dino/cactus style) ---
+  // ---------- Pixel sprites ----------
   function pxSize() {
-    // pixel block size in canvas pixels
     return Math.max(2, Math.floor(canvas.height / 180));
   }
 
@@ -108,7 +121,6 @@
     }
   }
 
-  // Two simple running frames (pixel-ish)
   const DINO_A = [
     "....XXXXXX....",
     "...XXXXXXXX...",
@@ -186,14 +198,14 @@
     "....XX......XX....",
   ];
 
-  // --- World ---
+  // ---------- World ----------
   let world;
 
   function resetWorld() {
-    const W = canvas.width, H = canvas.height;
+    const W = canvas.width;
+    const H = canvas.height;
     const px = pxSize();
 
-    // Landscape feels best when ground is higher and play area wide
     const groundY = Math.floor(H * 0.78);
     const groundThickness = Math.max(px * 2, Math.floor(H * 0.012));
 
@@ -202,13 +214,15 @@
       groundY,
       groundThickness,
 
-      speed: Math.max(210, W * 0.26), // much slower start
-      accel: 9,                      // gentle ramp,                        // ramps speed over time
+      // slower start + gentle increase
+      speed: Math.max(180, W * 0.22),
+      accel: 6.5,
 
-      gravity: Math.max(2600, H * 4.4),   // stronger gravity = less float
-      jumpV: Math.max(800, H * 0.95),     // smaller jump impulse = lower jump
-      holdBoost: 0.22,                    // holding helps a bit, not too much
-      maxHold: 0.08,                      // shorter hold window
+      // jump tuned lower already (you can adjust later)
+      gravity: Math.max(2600, H * 4.4),
+      jumpV: Math.max(560, H * 0.95),
+      holdBoost: 0.22,
+      maxHold: 0.08,
 
       runner: {
         x: Math.floor(W * 0.14),
@@ -218,18 +232,16 @@
         holdT: 0,
         animT: 0,
         frame: 0,
-        // pixel sprite size
         scale: px,
       },
 
       obstacles: [],
       spawnT: 0,
-      nextSpawn: 0.9,
+      nextSpawn: 1.2,
 
       clouds: [],
       cloudT: 0,
 
-      // slight ground bumps
       bumps: [],
       bumpT: 0,
     };
@@ -255,76 +267,55 @@
     world.bumps.push({ x, w, h });
   }
 
+  // 1 or 2 cacti max, with real height variation and different heights when 2
   function spawnObstacle() {
     const W = world.W;
-  
-    // Only 1 or 2 cacti
+
     const count = Math.random() < 0.72 ? 1 : 2;
-  
-    // Gap between the two if present
     const gap = Math.max(world.px * 3, Math.floor(world.W * 0.008));
-  
+
     const cacti = [];
     let dx = 0;
-    let groupRight = 0;
-  
+
     for (let k = 0; k < count; k++) {
-      // pick a shape
       const r = Math.random();
       let map = CACTUS_SMALL;
-      if (r > 0.68) map = CACTUS_BIG;
-      if (r > 0.92) map = CACTUS_DOUBLE; // rare wider cactus
-  
-      // HEIGHT variation: scale affects height (and width a bit, like the real game)
-      // Make it noticeable but not crazy:
+      if (r > 0.65) map = CACTUS_BIG;
+      if (r > 0.92) map = CACTUS_DOUBLE;
+
+      // height variation: scale per cactus (so two in a row can differ)
       const heightScale = 0.85 + Math.random() * 0.55; // 0.85..1.40
       const scale = Math.max(1, Math.floor(world.px * heightScale));
-  
+
       const w = map[0].length * scale;
       const h = map.length * scale;
-  
+
       cacti.push({
         dx,
-        y: world.groundY - h,
-        w,
-        h,
         map,
         scale,
+        w,
+        h,
+        y: world.groundY - h,
       });
-  
+
       dx += w + gap;
-      groupRight = dx;
+    }
+
+    world.obstacles.push({
+      x: W + 30,
+      cacti,
+      right: dx, // total width for removal
+    });
+
+    // spawn timing based on speed (slow start => bigger gaps)
+    const speed = world.speed;
+    const baseMin = 1.05, baseMax = 1.85;
+    const speedFactor = clamp(520 / speed, 0.75, 1.35);
+    world.nextSpawn = clamp((baseMin + Math.random() * (baseMax - baseMin)) * speedFactor, 0.65, 2.0);
+    world.spawnT = 0;
   }
 
-  // Add the group
-  world.obstacles.push({
-    x: W + 30,
-    cacti,
-    right: groupRight, // total width for offscreen removal
-  });
-
-  // Spawn timing (still depends on speed)
-  const speed = world.speed;
-  const baseMin = 0.85, baseMax = 1.55;
-  const speedFactor = clamp(520 / speed, 0.70, 1.25);
-  world.nextSpawn = clamp((baseMin + Math.random() * (baseMax - baseMin)) * speedFactor, 0.55, 1.8);
-  world.spawnT = 0;
-}
-
-
-  world.obstacles.push({
-    x: W + 30,
-    cacti,
-    right: groupRight, // total width for offscreen removal
-  });
-
-  // spawn gap depends on speed (slower start => larger gaps)
-  const speed = world.speed;
-  const baseMin = 0.85, baseMax = 1.55;
-  const speedFactor = clamp(520 / speed, 0.65, 1.25);
-  world.nextSpawn = clamp((baseMin + Math.random() * (baseMax - baseMin)) * speedFactor, 0.55, 1.8);
-  world.spawnT = 0;
-}
   function aabbHit(a, b) {
     return (
       a.x < b.x + b.w &&
@@ -349,7 +340,7 @@
     showOverlay(true);
   }
 
-  // Input
+  // ---------- Input ----------
   canvas.addEventListener("pointerdown", (e) => {
     if (mode !== "playing") return;
     e.preventDefault();
@@ -360,18 +351,12 @@
   canvas.addEventListener("pointerup", () => { input.pressed = false; });
   canvas.addEventListener("pointercancel", () => { input.pressed = false; });
 
-  // Landscape enforcement (pause in portrait)
-  function isPortrait() {
-    const rect = canvas.getBoundingClientRect();
-    return rect.height > rect.width; // portrait
-  }
-
+  // ---------- Update / Draw ----------
   function update(dt) {
-    // speed ramps up
     world.speed += world.accel * dt;
 
-    // score grows with survival time (scaled so it looks like the dino counter)
-    setScore(score + dt * (world.speed / 90));
+    // score increases with survival time
+    setScore(score + dt * (world.speed / 100));
 
     // clouds
     world.cloudT += dt;
@@ -391,21 +376,20 @@
     for (const b of world.bumps) b.x -= world.speed * dt;
     world.bumps = world.bumps.filter(b => b.x + b.w > -80);
 
-    // obstacles spawn
+    // obstacles
     world.spawnT += dt;
-    if (world.obstacles.length === 0 && world.spawnT > 0.35) spawnObstacle();
+    if (world.obstacles.length === 0 && world.spawnT > 0.45) spawnObstacle();
     if (world.spawnT >= world.nextSpawn) spawnObstacle();
 
     for (const g of world.obstacles) g.x -= world.speed * dt;
     world.obstacles = world.obstacles.filter(g => g.x + g.right > -160);
 
-    // runner physics
+    // runner physics + animation
     const r = world.runner;
 
-    // run animation (only when on ground)
     if (r.onGround) {
       r.animT += dt;
-      const stepRate = clamp(world.speed / 520, 0.8, 1.8);
+      const stepRate = clamp(world.speed / 420, 0.9, 1.8);
       if (r.animT > (0.14 / stepRate)) {
         r.animT = 0;
         r.frame = 1 - r.frame;
@@ -414,7 +398,6 @@
       r.frame = 0;
     }
 
-    // hold to jump higher early in jump
     if (input.pressed && !r.onGround && r.holdT < world.maxHold && r.vy < 0) {
       r.vy -= world.gravity * world.holdBoost * dt;
       r.holdT += dt;
@@ -429,7 +412,7 @@
       r.onGround = true;
     }
 
-    // collisions
+    // collision
     const dinoMap = (r.frame === 0 ? DINO_A : DINO_B);
     const dinoW = dinoMap[0].length * r.scale;
     const dinoH = dinoMap.length * r.scale;
@@ -470,32 +453,30 @@
   function draw() {
     ctx.imageSmoothingEnabled = false;
 
-    const W = world.W, H = world.H;
+    const W = world.W;
+    const H = world.H;
 
-    // background
     ctx.fillStyle = BG;
     ctx.fillRect(0, 0, W, H);
 
-    // score top-right like dino
+    // dino-like score top-right (in addition to HUD)
     ctx.save();
     ctx.fillStyle = FG;
     ctx.globalAlpha = 0.9;
     ctx.font = `${Math.max(14, Math.floor(H * 0.045))}px ui-monospace, Menlo, Monaco, Consolas, "Courier New", monospace`;
     ctx.textAlign = "right";
     ctx.textBaseline = "top";
-    // HUD already shows it, but this makes it look like the real game
-    ctx.fillText(formatScore(score), W - Math.floor(18 * (window.devicePixelRatio || 1)), Math.floor(12 * (window.devicePixelRatio || 1)));
+    ctx.fillText(formatScore(score), W - 18, 12);
     ctx.restore();
 
-    // clouds
     for (const c of world.clouds) drawCloud(c.x, c.y, c.s);
 
-    // ground line
+    // ground
     ctx.fillStyle = FG;
     ctx.globalAlpha = 0.75;
     ctx.fillRect(0, world.groundY, W, world.groundThickness);
 
-    // tiny ground dots (like dino)
+    // small dots
     ctx.globalAlpha = 0.18;
     const dotY = world.groundY + world.groundThickness + world.px * 2;
     for (let x = 0; x < W; x += world.px * 6) {
@@ -504,12 +485,11 @@
 
     // bumps
     ctx.globalAlpha = 0.35;
-    for (const b of world.bumps) {
-      ctx.fillRect(b.x, world.groundY - b.h, b.w, world.px);
-    }
+    for (const b of world.bumps) ctx.fillRect(b.x, world.groundY - b.h, b.w, world.px);
+
     ctx.globalAlpha = 1.0;
 
-    // obstacles
+    // obstacles (1–2 cacti group)
     for (const g of world.obstacles) {
       for (const c of g.cacti) {
         drawPixels(c.map, Math.floor(g.x + c.dx), Math.floor(c.y), c.scale, FG);
@@ -523,15 +503,16 @@
     drawPixels(dinoMap, Math.floor(r.x), Math.floor(r.y - dinoH), r.scale, FG);
   }
 
+  // ---------- Main loop ----------
   function loop(now) {
     resizeCanvasToDisplaySize();
     ensureRotateOverlay();
 
-    // show rotate overlay in portrait and pause updates
     const portrait = isPortrait();
-    rotateOverlay.style.display = portrait ? "flex" : "none";
 
-    // rebuild world on resize
+    // show rotate message ONLY while playing
+    rotateOverlay.style.display = (portrait && mode === "playing") ? "flex" : "none";
+
     if (!world || world.W !== canvas.width || world.H !== canvas.height) {
       resetWorld();
     }
@@ -545,6 +526,7 @@
     requestAnimationFrame(loop);
   }
 
+  // ---------- Start (robust on iPhone) ----------
   function startGame(e) {
     if (e) e.preventDefault();
     resetWorld();
@@ -552,9 +534,21 @@
     showOverlay(false);
   }
 
-  ["click", "pointerup", "touchend"].forEach((ev) => {
-    startBtn.addEventListener(ev, startGame, { passive: false });
-  });
+  // event delegation (works even if button is re-rendered)
+  function startDelegated(e) {
+    const t = e.target;
+    if (t && t.id === "startBtn") startGame(e);
+  }
+  overlay.addEventListener("click", startDelegated, { passive: false });
+  overlay.addEventListener("touchend", startDelegated, { passive: false });
+  overlay.addEventListener("pointerup", startDelegated, { passive: false });
+
+  // direct binding too
+  if (startBtn) {
+    startBtn.addEventListener("click", startGame, { passive: false });
+    startBtn.addEventListener("touchend", startGame, { passive: false });
+    startBtn.addEventListener("pointerup", startGame, { passive: false });
+  }
 
   // init
   setBest(best);
