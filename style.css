@@ -4,24 +4,28 @@
   --muted:#9aa7b5;
 }
 
-*{box-sizing:border-box}
-html,body{
+*{ box-sizing:border-box; }
+
+html, body{
   height:100%;
   margin:0;
   background:var(--bg);
   color:var(--fg);
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+
+  /* Default for games (canvas full-screen) */
   overflow:hidden;
   touch-action:none;
 }
 
+/* Canvas games */
 #game{
   display:block;
   width:100vw;
   height:100vh;
 }
 
-/* HUD */
+/* ---------- HUD ---------- */
 .hud{
   position:fixed;
   top: calc(env(safe-area-inset-top) + 10px);
@@ -38,7 +42,7 @@ html,body{
 .hudLeft{ left: calc(env(safe-area-inset-left) + 12px); }
 .hudRight{ right: calc(env(safe-area-inset-right) + 12px); }
 
-/* Overlay */
+/* ---------- Overlay (Start / Game Over) ---------- */
 .overlay{
   position:fixed;
   inset:0;
@@ -59,21 +63,18 @@ html,body{
   padding:18px;
   backdrop-filter: blur(14px);
 }
-
 .title{
   font-size:28px;
   font-weight:900;
   text-align:center;
   margin-bottom:14px;
 }
-
 .scores{
   display:flex;
   flex-direction:column;
   gap:10px;
-  margin: 10px 0 16px;
+  margin:10px 0 16px;
 }
-
 .scoreRow{
   display:flex;
   justify-content:space-between;
@@ -83,7 +84,6 @@ html,body{
   background:rgba(255,255,255,0.06);
   border:1px solid rgba(255,255,255,0.10);
 }
-
 .label{ color:var(--muted); font-weight:800; }
 .value{ font-size:22px; font-weight:900; }
 
@@ -105,7 +105,6 @@ button:active{ transform:translateY(1px); }
   color:var(--muted);
   font-size:12px;
 }
-
 .linkBack{
   display:block;
   margin-top:10px;
@@ -116,37 +115,49 @@ button:active{ transform:translateY(1px); }
 }
 .linkBack:active{ opacity:0.7; }
 
-/* Home page */
-body.home{
+/* ---------- Home page (NEW index.html structure) ---------- */
+/* Your body stays overflow:hidden; we scroll inside .home safely */
+.home{
+  height:100vh;
   overflow:auto;
+  -webkit-overflow-scrolling:touch;
   touch-action:manipulation;
-}
-.homeWrap{
-  min-height:100%;
+
+  /* centered layout */
+  width:100%;
+  max-width:720px;
+  margin:0 auto;
   padding: calc(env(safe-area-inset-top) + 22px) 18px 26px;
-  max-width: 720px;
-  margin: 0 auto;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
-.homeHeader{
-  text-align:center;
-  margin-bottom:18px;
-}
+
 .homeTitle{
   font-size:36px;
   font-weight:950;
   letter-spacing:0.2px;
+  text-align:center;
+  width:100%;
 }
+
 .homeSubtitle{
   margin-top:8px;
   color:var(--muted);
   font-weight:700;
+  text-align:center;
+  width:100%;
 }
+
 .grid{
+  width:min(520px, 92vw);
+  margin:18px auto 0 auto;
   display:grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  margin-top: 18px;
+  grid-template-columns:1fr;
+  gap:14px;
 }
+
 .gameCard{
   display:block;
   text-decoration:none;
@@ -157,22 +168,44 @@ body.home{
   background:rgba(255,255,255,0.08);
 }
 .gameCard:active{ transform:translateY(1px); opacity:0.95; }
-.gameName{
-  font-size:22px;
-  font-weight:950;
-}
+
+.gameName{ font-size:22px; font-weight:950; }
 .gameHint{
   margin-top:6px;
   color:var(--muted);
   font-weight:700;
   font-size:13px;
 }
-.ver{
-  font-size: 12px;
-  font-weight: 800;
-  opacity: 0.65;
-  margin-left: 8px;
+
+.homeFooter{
+  margin-top:18px;
+  text-align:center;
+  color:var(--muted);
+  font-weight:700;
+  font-size:12px;
+  width:100%;
 }
+
+/* Version badge */
+.ver{
+  font-size:12px;
+  font-weight:800;
+  opacity:0.65;
+  margin-left:8px;
+}
+
+/* ---------- Backward compatibility (older home markup you used before) ---------- */
+body.home{
+  overflow:auto;
+  touch-action:manipulation;
+}
+.homeWrap{
+  min-height:100%;
+  padding: calc(env(safe-area-inset-top) + 22px) 18px 26px;
+  max-width:720px;
+  margin:0 auto;
+}
+.homeHeader{ text-align:center; margin-bottom:18px; }
 .footerTiny{
   margin-top:18px;
   text-align:center;
@@ -180,4 +213,3 @@ body.home{
   font-weight:700;
   font-size:12px;
 }
-
