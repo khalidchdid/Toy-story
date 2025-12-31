@@ -71,8 +71,8 @@
     const H = canvas.height;
 
     // margin so field doesn't touch edges (safe for rounded corners)
-    const marginX = Math.floor(W * 0.07);
-    const marginY = Math.floor(H * 0.10);
+    const marginX = Math.floor(W * 0.10);
+    const marginY = Math.floor(H * 0.14);
 
     const fx = marginX;
     const fy = marginY;
@@ -85,8 +85,8 @@
   // Choose grid size based on field size and a comfortable cell size
   function computeGrid(field) {
     // aim for cell size between 18 and 28 device pixels (in canvas pixels)
-    let cell = Math.floor(Math.min(field.w / 28, field.h / 18));
-    cell = clamp(cell, 16, 28);
+    let cell = Math.floor(Math.min(field.w / 22, field.h / 14));
+    cell = clamp(cell, 20, 36);
 
     // cols/rows fit inside field
     const cols = Math.floor(field.w / cell);
