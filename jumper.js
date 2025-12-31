@@ -61,7 +61,7 @@
     return rect.height > rect.width;
   }
 
-  // Rotate overlay (never blocks taps)
+  // Rotate overlay (never blocks Start)
   let rotateOverlay = document.getElementById("rotateOverlay");
   function ensureRotateOverlay() {
     if (!rotateOverlay) {
@@ -202,13 +202,13 @@
       groundY,
       groundThickness,
 
-      // slower start + gentle acceleration
-      speed: Math.max(170, W * 0.20),
-      accel: 6.5,
+      // ✅ Harder start + quicker rhythm (but still fair)
+      speed: Math.max(220, W * 0.26),
+      accel: 9.5,
 
-      // low jumps (already tuned)gravity: Math.max(2400, H * 4.0),
+      // ✅ Your chosen jump feel
       gravity: Math.max(2400, H * 4.0),
-      jumpV:   Math.max(820,  H * 1.35),
+      jumpV: Math.max(820, H * 1.35),
       holdBoost: 0.24,
       maxHold: 0.09,
 
@@ -225,7 +225,8 @@
 
       obstacles: [],
       spawnT: 0,
-      nextSpawn: 1.3,
+      nextSpawn: 1.05,
+      lastGap: 0,
 
       clouds: [],
       cloudT: 0,
@@ -253,24 +254,58 @@
     world.bumps.push({ x, w, h });
   }
 
+  // ✅ Variable frequency: mixture of short/medium/long gaps + anti-repetition
+  function computeNextSpawn() {
+    const speedFactor = clamp(520 / world.speed, 0.70, 1.10);
+
+    // mixture distribution (unpredictable rhythm)
+    const r = Math.random();
+    let base;
+    if (r < 0.22) {
+      // short gap (hard)
+      base = 0.70 + Math.random() * 0.28; // 0.70..0.98
+    } else if (r < 0.80) {
+      // medium gap
+      base = 0.95 + Math.random() * 0.55; // 0.95..1.50
+    } else {
+      // long gap (breather)
+      base = 1.45 + Math.random() * 0.70; // 1.45..2.15
+    }
+
+    // jitter so it doesn't feel periodic
+    base *= (0.88 + Math.random() * 0.28); // 0.88..1.16
+
+    // anti-repeat: if too close to previous, push it away
+    if (world.lastGap > 0 && Math.abs(base - world.lastGap) < 0.12) {
+      base *= (Math.random() < 0.5 ? 0.78 : 1.28);
+    }
+
+    const gap = clamp(base * speedFactor, 0.55, 2.0);
+    world.lastGap = gap;
+    return gap;
+  }
+
+  // ✅ max 2 cacti, a bit taller (slightly), can differ in height when 2
   function spawnObstacle() {
     const W = world.W;
 
-    // max 2 cacti
-    const count = Math.random() < 0.72 ? 1 : 2;
+    const count = Math.random() < 0.70 ? 1 : 2;
     const gap = Math.max(world.px * 3, Math.floor(world.W * 0.008));
 
     const cacti = [];
     let dx = 0;
 
     for (let k = 0; k < count; k++) {
+      // slightly more "big" cacti as speed grows (challenge ramps naturally)
+      const speed01 = clamp((world.speed - 220) / 600, 0, 1);
       const r = Math.random();
-      let map = CACTUS_SMALL;
-      if (r > 0.65) map = CACTUS_BIG;
-      if (r > 0.92) map = CACTUS_DOUBLE;
 
-      // each cactus gets its own height scale (so 2 can differ)
-      const heightScale = 0.85 + Math.random() * 0.55; // 0.85..1.40
+      let map = CACTUS_SMALL;
+      if (r > (0.62 - 0.10 * speed01)) map = CACTUS_BIG;      // more likely as speed increases
+      if (r > (0.93 - 0.04 * speed01)) map = CACTUS_DOUBLE;   // still rare
+
+      // height scale bumped a bit (NOT too much)
+      const heightScale = 0.98 + Math.random() * 0.58; // 0.98..1.56 (slightly taller than before)
       const scale = Math.max(1, Math.floor(world.px * heightScale));
 
       const w = map[0].length * scale;
@@ -282,9 +317,7 @@
 
     world.obstacles.push({ x: W + 30, cacti, right: dx });
 
-    // spacing depends on speed (slow start => bigger gaps)
-    const speedFactor = clamp(520 / world.speed, 0.75, 1.35);
-    world.nextSpawn = clamp((1.05 + Math.random() * 0.80) * speedFactor, 0.65, 2.0);
+    world.nextSpawn = computeNextSpawn();
     world.spawnT = 0;
   }
 
@@ -318,37 +351,44 @@
   canvas.addEventListener("pointercancel", () => { input.pressed = false; });
 
   function update(dt) {
+    // Speed ramps (quicker rhythm over time)
     world.speed += world.accel * dt;
+
+    // Score increases with survival time
     setScore(score + dt * (world.speed / 105));
 
+    // Clouds
     world.cloudT += dt;
-    if (world.cloudT > 1.25) {
+    if (world.cloudT > 1.15) {
       world.cloudT = 0;
-      if (Math.random() < 0.75) spawnCloud(false);
+      if (Math.random() < 0.78) spawnCloud(false);
     }
     for (const c of world.clouds) c.x -= (world.speed * 0.18) * dt;
     world.clouds = world.clouds.filter(c => c.x > -200);
 
+    // Ground bumps
     world.bumpT += dt;
-    if (world.bumpT > 0.55) {
+    if (world.bumpT > 0.50) {
       world.bumpT = 0;
       if (Math.random() < 0.9) spawnBump();
     }
     for (const b of world.bumps) b.x -= world.speed * dt;
     world.bumps = world.bumps.filter(b => b.x + b.w > -80);
 
+    // Obstacles
     world.spawnT += dt;
-    if (world.obstacles.length === 0 && world.spawnT > 0.45) spawnObstacle();
+    if (world.obstacles.length === 0 && world.spawnT > 0.40) spawnObstacle();
     if (world.spawnT >= world.nextSpawn) spawnObstacle();
 
     for (const g of world.obstacles) g.x -= world.speed * dt;
     world.obstacles = world.obstacles.filter(g => g.x + g.right > -160);
 
+    // Runner physics + animation
     const r = world.runner;
 
     if (r.onGround) {
       r.animT += dt;
-      const stepRate = clamp(world.speed / 420, 0.9, 1.8);
+      const stepRate = clamp(world.speed / 420, 0.95, 2.0);
       if (r.animT > (0.14 / stepRate)) {
         r.animT = 0;
         r.frame = 1 - r.frame;
@@ -371,6 +411,7 @@
       r.onGround = true;
     }
 
+    // Collision
     const dinoMap = (r.frame === 0 ? DINO_A : DINO_B);
     const dinoW = dinoMap[0].length * r.scale;
     const dinoH = dinoMap.length * r.scale;
@@ -406,7 +447,7 @@
     ctx.fillStyle = BG;
     ctx.fillRect(0, 0, W, H);
 
-    // score text (extra dino vibe)
+    // dino-like score text (in addition to HUD)
     ctx.save();
     ctx.fillStyle = FG;
     ctx.globalAlpha = 0.9;
@@ -418,20 +459,24 @@
 
     for (const c of world.clouds) drawCloud(c.x, c.y, c.s);
 
+    // ground
     ctx.fillStyle = FG;
     ctx.globalAlpha = 0.75;
     ctx.fillRect(0, world.groundY, W, world.groundThickness);
 
+    // bumps
     ctx.globalAlpha = 0.35;
     for (const b of world.bumps) ctx.fillRect(b.x, world.groundY - b.h, b.w, world.px);
     ctx.globalAlpha = 1.0;
 
+    // obstacles
     for (const g of world.obstacles) {
       for (const c of g.cacti) {
         drawPixels(c.map, Math.floor(g.x + c.dx), Math.floor(c.y), c.scale, FG);
       }
     }
 
+    // dino
     const r = world.runner;
     const dinoMap = (r.frame === 0 ? DINO_A : DINO_B);
     const dinoH = dinoMap.length * r.scale;
@@ -463,7 +508,7 @@
     showOverlay(false);
   }
 
-  // robust start binding (works even in iPhone PWA)
+  // robust start binding (iPhone PWA safe)
   const delegated = (e) => { if (e.target && e.target.id === "startBtn") startGame(e); };
   overlay.addEventListener("click", delegated, { passive: false });
   overlay.addEventListener("touchend", delegated, { passive: false });
