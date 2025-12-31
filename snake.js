@@ -92,7 +92,8 @@
   function computeGrid(field) {
     // aim for cell size between 18 and 28 device pixels (in canvas pixels)
     let cell = Math.floor(Math.min(field.w / 22, field.h / 14));
-    cell = clamp(cell, 20, 36);
+    cell = Math.floor(cell * 1.35);     // ~×1.3–×1.4 bigger squares
+    cell = clamp(cell, 22, 46);
 
     // cols/rows fit inside field
     const cols = Math.floor(field.w / cell);
