@@ -49,6 +49,7 @@
   }
 
   function ensureRotateOverlay() {
+    rotateOverlay.style.pointerEvents = "none";
     if (rotateOverlay) return;
     rotateOverlay = document.createElement("div");
     rotateOverlay.id = "rotateOverlay";
