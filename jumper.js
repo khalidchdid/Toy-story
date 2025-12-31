@@ -206,10 +206,10 @@
       speed: Math.max(170, W * 0.20),
       accel: 6.5,
 
-      // low jumps (already tuned)
-      gravity: Math.max(2000, H * 3.5),   // slightly less gravity (more hang time)
-      jumpV: Math.max(800, H * 1.5),     // ~2x higher jump
-      holdBoost: 0.24,                    // small hold help
+      // low jumps (already tuned)gravity: Math.max(2400, H * 4.0),
+      gravity: Math.max(2400, H * 4.0),
+      jumpV:   Math.max(820,  H * 1.35),
+      holdBoost: 0.24,
       maxHold: 0.09,
 
       runner: {
