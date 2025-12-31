@@ -207,8 +207,8 @@
       accel: 6.5,
 
       // low jumps (already tuned)
-      gravity: Math.max(2450, H * 4.1),   // slightly less gravity (more hang time)
-      jumpV: Math.max(790, H * 1.34),     // ~2x higher jump
+      gravity: Math.max(1000, H * 2),   // slightly less gravity (more hang time)
+      jumpV: Math.max(1000, H *2),     // ~2x higher jump
       holdBoost: 0.24,                    // small hold help
       maxHold: 0.09,
 
