@@ -11,7 +11,7 @@ const ASSETS = [
   "./snake.html",
   "./snake.js",
   "./manifest.webmanifest",
-  "./service-worker.js"
+  "./service-worker.js",
   "./version.js",
 ];
 
