@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f14" />
+  <title>Our Story • Chat</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="home">
+    <div class="homeTitle">Messaging</div>
+    <div class="homeSubtitle">2-person chat (app must be open)</div>
+
+    <div class="card" style="width:min(720px,92vw);">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input id="room" placeholder="Room code (shared secret)"
+          style="flex:2;min-width:200px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:var(--fg);font-weight:800;outline:none;">
+        <input id="sender" placeholder="Sender name (e.g. Khalid)"
+          style="flex:1;min-width:140px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:var(--fg);font-weight:800;outline:none;">
+        <button id="connectBtn" style="flex:0 0 130px;">Connect</button>
+      </div>
+
+      <div id="log" style="margin-top:12px;height:46vh;overflow:auto;border-radius:14px;padding:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);"></div>
+
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <input id="msg" placeholder="Type a message…"
+          style="flex:1;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);color:var(--fg);font-weight:800;outline:none;">
+        <button id="sendBtn" style="flex:0 0 120px;">Send</button>
+      </div>
+
+      <a class="linkBack" href="./index.html">← Back</a>
+      <div class="tiny" id="status">Not connected</div>
+    </div>
+  </div>
+
+  <script src="./chat.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("./service-worker.js");
+  </script>
+</body>
+</html>
