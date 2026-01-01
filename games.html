@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Our Story" />
+
+  <title>Our Story • Games</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="home">
+    <div class="homeTitle">Games</div>
+    <div class="homeSubtitle">Choose a game</div>
+
+    <div class="grid">
+      <a class="gameCard" href="./pong.html">
+        <div class="gameName">Pong</div>
+        <div class="gameHint">Drag to move • Beat the AI</div>
+      </a>
+
+      <a class="gameCard" href="./jumper.html">
+        <div class="gameName">Jumper</div>
+        <div class="gameHint">Tap to jump • Endless runner</div>
+      </a>
+
+      <a class="gameCard" href="./snake.html">
+        <div class="gameName">Snake</div>
+        <div class="gameHint">Swipe to turn • Wrap-around</div>
+      </a>
+
+      <a class="gameCard" href="./sync.html">
+        <div class="gameName">Sync</div>
+        <div class="gameHint">Shared best scores across iPhones</div>
+      </a>
+    </div>
+
+    <a class="linkBack" href="./index.html">← Back</a>
+  </div>
+
+  <script src="./version.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("./service-worker.js");
+  </script>
+</body>
+</html>
