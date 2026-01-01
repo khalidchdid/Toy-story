@@ -14,6 +14,8 @@ const ASSETS = [
   "./manifest.webmanifest",
   "./service-worker.js",
   "./version.js",
+  "./chat.html",
+  "./chat.js",
 ];
 
 self.addEventListener("install", (event) => {
