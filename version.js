@@ -1,5 +1,5 @@
 (function(){
-  const V = "23";
+  const V = "24";
   // page
   if (typeof window !== "undefined") window.TOY_STORY_VERSION = V;
   // service worker
