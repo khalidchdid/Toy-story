@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f14" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Our Story" />
+
+  <title>Our Story • Social</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="home">
+    <div class="homeTitle">Social Media</div>
+    <div class="homeSubtitle">Features for us</div>
+
+    <div class="grid">
+      <a class="menuBtn" href="./chat.html">
+        <div class="menuBtnTitle">Messaging</div>
+        <div class="menuBtnHint">Chat with one person</div>
+      </a>
+
+      <div class="menuSoon">More social features soon.</div>
+    </div>
+
+    <a class="linkBack" href="./index.html">← Back</a>
+  </div>
+
+  <script src="./version.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("./service-worker.js");
+  </script>
+</body>
+</html>
