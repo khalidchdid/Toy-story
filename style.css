@@ -150,6 +150,32 @@ button:active{ transform:translateY(1px); }
   width:100%;
 }
 
+.menuBtn{
+  display:block;
+  text-decoration:none;
+  color:var(--fg);
+  padding:18px 16px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.14);
+  background:rgba(255,255,255,0.08);
+}
+.menuBtn:active{ transform:translateY(1px); opacity:0.95; }
+
+.menuBtnTitle{ font-size:24px; font-weight:950; }
+.menuBtnHint{
+  margin-top:6px;
+  color:var(--muted);
+  font-weight:700;
+  font-size:13px;
+}
+
+.menuSoon{
+  text-align:center;
+  color:var(--muted);
+  font-weight:700;
+  font-size:12px;
+  padding:6px 0 0;
+}
 .grid{
   width:min(520px, 92vw);
   margin:18px auto 0 auto;
